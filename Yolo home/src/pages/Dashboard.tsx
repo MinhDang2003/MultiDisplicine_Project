@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Users from "../component/Users";
 import 'regenerator-runtime/runtime';
-
+import DevicesAPI from "../api_copy/DeviceApi";
 import { useTheme } from "@mui/material";
 import Sidebarr from "../component/Sidebar";
 import RoomBar from '../component/bars/rooms/RoomsBar';
@@ -122,8 +122,25 @@ function Dashboard() {
     const closeErrorPopup = () => {
         setError(null);
     };
+    
+    useEffect(() => {
+        const source = new EventSource('http://127.0.0.1:8090/stream');
+        
+        
+        source.onmessage = function() {
+            setTimeout(() => setCount(prevCount => (prevCount + 1) % 2), 1000);
+            
+            console.log((count + 1) % 2)
+          console.log(count)
+        };
+        return () => {
+        
+          source.close();
+        };
+      },[]);  // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     useEffect(() => {
+        console.log("4")
         const getData = async () => {
             const res = await getAllRoomsData();
             setData(res);
@@ -135,28 +152,31 @@ function Dashboard() {
     }, [triggerRender]);
 
     useEffect(() => {
+        console.log("9999")
         const getData = async () => {
             const res = await getDevicesOfRoom(selectedRoom);
-            if (selectedRoom !== "0") setDevicesData(res);
+            console.log(res)
+            setDevicesData(res);
         };
         getData();
     }, [selectedRoom, count]);
 
     useEffect(() => {
+        console.log("2")
         if (toggleData) {
             const toggle = async () => {
+                console.log("example")
+                console.log(toggleData)
                 const res = await toggleDevice(toggleData[0], toggleData[1], toggleData[2], toggleData[3]);
                 if (res) {
                     setTimeout(() => setCount((count + 1) % 2), 1000);
+
                 }
             };
             toggle();
         }
     }, [toggleData]);
 
-    useEffect(() => {
-        setTimeout(() => setCount((count + 1) % 2), 1000);
-    }, [triggerRender]);
 
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);

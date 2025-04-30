@@ -1,7 +1,7 @@
 
 from datetime import date,datetime,time,timedelta
 from pymongo.mongo_client  import MongoClient
-from pymongo import ASCENDING
+from pymongo import ASCENDING, ReturnDocument
 from pymongo.server_api import ServerApi
 import random
 import hashlib, binascii, os
@@ -274,6 +274,16 @@ class MongoAPI():
     @classmethod
     def getLogData(cls,limit_record: int,start_date: datetime,end_date : datetime = datetime.combine(datetime.today(), time.min),current=False):
         pass
+    
+    @classmethod
+    def updateFeedID(cls,feedID,value):
+        rooms.find_one_and_update({"appliances": {"$elemMatch": {"feed_id": feedID}}},{"$set": {"appliances.$.value": int(value)}},return_document=ReturnDocument.AFTER)
+        result = rooms.find_one(
+            {"appliances": {"$elemMatch": {"feed_id": feedID}}},
+            {"_id": 0 , "room_id": 1, "appliances.$": 1}
+
+        )
+        return result
 #print(temp.find_one()['timestamp'].hour)
 # start = 20
 # end = 45     

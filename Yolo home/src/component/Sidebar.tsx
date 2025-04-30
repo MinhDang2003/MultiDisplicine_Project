@@ -2,9 +2,7 @@ import { useState } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { tokens } from "../theme.tsx";
-
 import "react-pro-sidebar/dist/css/styles.css";
-
 import { useNavigate, Link } from "react-router-dom";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import FaceIcon from '@mui/icons-material/Face';
@@ -12,6 +10,7 @@ import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import LogoutIcon from '@mui/icons-material/Logout';
 import useLogout from "../hooks/useLogout";
+import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
 
 const Item = ({ title, to, icon, selected, setSelected }: { title: string; to: string; icon: JSX.Element; selected: string; setSelected: React.Dispatch<React.SetStateAction<string>> }) => {
     const theme = useTheme();
@@ -109,6 +108,13 @@ const Sidebarr = () => {
                             title="Facial verification"
                             to="/CamTest"
                             icon={<FaceIcon />}
+                            selected={selected}
+                            setSelected={setSelected}
+                        />
+                        <Item
+                            title="Voice Recognition"
+                            to="/Voice"
+                            icon={<KeyboardVoiceIcon />}
                             selected={selected}
                             setSelected={setSelected}
                         />

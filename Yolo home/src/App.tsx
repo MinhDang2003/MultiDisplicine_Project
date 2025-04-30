@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard.tsx';
 import PersistLogin from './component/PersistLogin.tsx';
 import WebcamCapture from './pages/TestCam.tsx'
 import Users from './component/Users.tsx';
+import VoiceRecognitionPage from './pages/Voice.tsx';
 function App() {
   
 
@@ -28,6 +29,7 @@ function App() {
                 <Route path='/Dashboard' element={<Dashboard></Dashboard>}/>
                 <Route path='/CamTest' element={<WebcamCapture></WebcamCapture>}></Route>
                 <Route path='/Users' element={<Users></Users>}></Route>
+                <Route path='/Voice' element={<VoiceRecognitionPage></VoiceRecognitionPage>}></Route>
               </Route>
             </Route>
             

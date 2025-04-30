@@ -2,9 +2,11 @@ from Adafruit_IO import Client, Feed, Data, RequestError,MQTTClient
 import random
 import sys
 import time
-
+import requests
+from flask import  jsonify
+from bson.json_util import dumps
 from Model.MongoSetup import *
-ADAFRUIT_IO_KEY = 'aio_xgOp92q3yRLYvYsZRrmJ8YlA5x7T'
+ADAFRUIT_IO_KEY = 'aio_OFbU85LInhg2WpJ6kE1VO2T0kfJS'
 ADAFRUIT_IO_USERNAME = 'grassni'
 ADAFRUIT_IO_URL = 'io.adafruit.com'
 
@@ -12,6 +14,7 @@ IO_FEED_USERNAME = 'grassni'
 
 
 class AdaAPI:
+    server = True
     _current_feed=None
     _FEED_ID_List = ['face','temp','humidity','led1','led2','led3','led4','light','speed']
     _temp = []
@@ -53,28 +56,35 @@ class AdaAPI:
           MongoAPI.addLog(1,float(payload))
         if feed_id == "light":
           MongoAPI.addLog(2,float(payload))
+      if feed_id in ['led1','led2','led3','led4','speed']:
+        if AdaAPI.server == True:
+          print("HEREEEE")
+          result  = MongoAPI().updateFeedID(feed_id,payload)
+          print(result)
+          response = requests.post('http://127.0.0.1:8090/toggle_flag',data=(dumps(result)))
+          if response.ok:
+            print(response.text)
+          else:
+            print('Error:', response.status_code)
+        else:  AdaAPI.server = True
       #print(type(payload))
     def publishData(self,data,nameFeed):
       print('Publishing {0} to {1}.'.format(data, nameFeed))
+      AdaAPI.server = False
       try:
         self.client.publish(nameFeed,data,feed_user=IO_FEED_USERNAME)
       except:
         print("ERRROR")
-    def returnTemp(self):
-      return AdaAPI._temp
     def setUpAda(self):
-      
-      
-      
       self.client.loop_background()
-      try:
-        while True:
-          # value = random.randint(0, 100)
-          # feed_index = random.randint(0,len(AdaAPI._FEED_ID_List)-1)
-          # nameFeed = AdaAPI._FEED_ID_List[feed_index]
-          #print('Publishing {0} to {1}.'.format(value, nameFeed))
-          #self.client.publish(nameFeed,value,feed_user=IO_FEED_USERNAME)
-          pass
-      except KeyboardInterrupt:
-        self.client.disconnect()
-        sys.exit(1)
+      # try:
+      #   while True:
+      #     # value = random.randint(0, 100)
+      #     # feed_index = random.randint(0,len(AdaAPI._FEED_ID_List)-1)
+      #     # nameFeed = AdaAPI._FEED_ID_List[feed_index]
+      #     #print('Publishing {0} to {1}.'.format(value, nameFeed))
+      #     #self.client.publish(nameFeed,value,feed_user=IO_FEED_USERNAME)
+      #     pass
+      # except KeyboardInterrupt:
+      #   self.client.disconnect()
+      #   sys.exit(1)

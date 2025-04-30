@@ -1,15 +1,55 @@
-from flask import Flask , jsonify, request , make_response
+from flask import Flask , jsonify, request , make_response , Response
+import threading
+import time
+from urllib.parse import parse_qs
+from bson.json_util import loads
+import json
+
+import atexit
 
 from flask_jwt_extended import jwt_required , JWTManager
 
 from flask_cors import CORS, cross_origin
 
-
+from Ada import AdaAPI
 from datetime import  timedelta 
 
  
 from presenter import Presenter
 import uuid
+
+flag = False
+
+class PrintHello(threading.Thread):
+    def __init__(self):
+        super(PrintHello, self).__init__()
+        self.daemon = True
+        self.running = True
+        self.ada = Presenter.ada
+        self.flag = False
+
+    def run(self):
+        
+        if self.running == True and self.flag == False:
+            self.ada.setUpAda()
+            self.flag == True
+
+    def stop(self):
+        #print("IM DEAD")
+        self.ada.client.disconnect()
+        self.running = False
+def stop_thread():
+    thread.stop()
+    thread.join()
+    if thread.is_alive():
+        print("Thread is still running.")
+    else:
+        print("Thread has stopped.")
+    
+atexit.register(stop_thread)
+
+thread = PrintHello()
+thread.start()
 
 app = Flask(__name__)
 # app.config["SESSION_PERMANENT"] = False
@@ -23,18 +63,41 @@ app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(seconds=48000000)
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 cors = CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
 
-
+data = None
 
 app.config["JWT_SECRET_KEY"] = b"6hc/_gsh,./;2ZZx3c6_s,1//"
 
 jwt = JWTManager(app)
-
 def _build_cors_preflight_response():
     response = make_response()
     response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "*")
     response.headers.add("Access-Control-Allow-Methods", "*")
     return response
+def event_stream():
+    global flag
+    global data
+    while True:
+        if flag:
+            json_data = json.dumps(data)
+            yield f"data: {json_data}\n\n"
+
+            flag = False  # Reset the flag after sending the message
+          # you can change this value to alter the frequency of updates
+@app.route('/stream',methods=['GET'])
+def stream():
+    return Response(event_stream(), mimetype="text/event-stream")
+@app.route('/toggle_flag',methods=['POST'])
+def toggle_flag():
+    global data
+    global flag
+    data1 = request.get_data()
+    
+    data1 = loads(data1)
+    
+    data = data1
+    flag = True
+    return 'Flag toggled!'
 
 @app.route('/users/refresh',methods=['GET'])
 @jwt_required(optional=True,verify_type=True)
@@ -138,6 +201,6 @@ def uploadImg():
 def verify():
     return Presenter.verify()
 if __name__ == "__main__":
-    app.run(debug=True,port=8090)
-    
+    app.run(port=8090)
+        
     

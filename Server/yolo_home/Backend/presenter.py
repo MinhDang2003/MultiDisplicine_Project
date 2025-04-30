@@ -20,6 +20,7 @@ from PIL import Image
 import io
 
 class Presenter:
+    ada = AdaAPI()
     def __init__(self) -> None:
         pass
     @classmethod
@@ -195,8 +196,7 @@ class Presenter:
                     continue
                 if arr[-(i+1)]['value'] == []: 
                     continue
-                print("HERE")
-                print(i)
+                
                 returnAr = arr[:48-(i)]
                 break
             
@@ -251,7 +251,7 @@ class Presenter:
     @classmethod
     def handle_add_temp(cls,val: float):
         try:
-            AdaAPI().publishData(val,'temp')
+            Presenter.ada.publishData(val,'temp')
         except Exception as e:
             print(f"Error: {e}")
         else: 
@@ -263,7 +263,7 @@ class Presenter:
     @classmethod
     def handle_add_humid(cls,val: float):
         try:
-            AdaAPI().publishData(val,'humidity')
+            Presenter.ada.publishData(val,'humidity')
         except Exception as e:
             print(f"Error: {e}")
         else: 
@@ -355,7 +355,7 @@ class Presenter:
         if type(result) is not tuple:
             return jsonify({"msg": "Failed to update fan"}) , 400
         result , feed_id = result
-        AdaAPI().publishData(level,feed_id)
+        Presenter.ada.publishData(level,feed_id)
         return jsonify({"msg": "Successful"}) , 200 
     
     @classmethod
@@ -375,7 +375,7 @@ class Presenter:
         if type(result) is not tuple:
             return jsonify({"msg": "Failed to update fan"}) , 400
         result , feed_id = result
-        AdaAPI().publishData(color,feed_id)
+        Presenter.ada.publishData(color,feed_id)
         return jsonify({"msg": "Successful"}) , 200 
     
     @classmethod
@@ -525,11 +525,11 @@ class Presenter:
             count += 1
         print(count)
         if count * 1.0 / length < 0.5:
-            AdaAPI().publishData(0,'face')
+            Presenter.ada.publishData(0,'face')
             return jsonify({"msg": "Successfully" , "verified": 'false'}) , 400
-        AdaAPI().publishData(1,'face')
+        Presenter.ada.publishData(1,'face')
         return jsonify({"msg": "Successfully" , "verified": 'true'}) , 200
     
     @classmethod
     def getFeedList(cls):
-        return AdaAPI().getFeedlst()
+        return Presenter.ada.getFeedlst()
